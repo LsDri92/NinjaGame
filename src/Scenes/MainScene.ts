@@ -1,11 +1,10 @@
 import { OldFilmFilter } from "@pixi/filter-old-film";
 import { Container, Texture, TilingSprite } from "pixi.js";
 import { HEIGHT, WIDTH } from "..";
+import { Boss } from "../Game/Boss";
 import { NinjaAnim as Player } from "../Game/NinjaAnim";
-import { PhysicsContainer } from "../Game/PhysicsContainer";
 import { Button } from "../Utils/Button";
 import { IUpdateable } from "../Utils/IUpdateable";
-
 
 
 export class MainScene extends Container implements IUpdateable {
@@ -15,17 +14,20 @@ export class MainScene extends Container implements IUpdateable {
     private moveLeft: Button;
     private moveRight: Button;
     private attack: Button;
-    private physNinja: PhysicsContainer;
     private sky: TilingSprite;
     private clouds1: TilingSprite;
     private clouds2: TilingSprite;
     private ground1: TilingSprite;
     private ground2: TilingSprite;
     private ground3: TilingSprite;
+    private boss: Boss;
+    
 
 
     constructor() {
         super()
+
+
 
         this.background = new Container
         this.sky = new TilingSprite(Texture.from("sky"), WIDTH, HEIGHT)
@@ -45,7 +47,7 @@ export class MainScene extends Container implements IUpdateable {
             Texture.from("moveLeft"),
             Texture.from("moveLeft"),
         );
-        this.moveLeft.on("movingClick", this.onLeftClick, this);
+        this.moveLeft.on("downClick", this.onLeftClick, this);
 
         this.moveLeft.position.set(100, 640);
         this.moveLeft.scale.set(1.5)
@@ -55,7 +57,7 @@ export class MainScene extends Container implements IUpdateable {
             Texture.from("moveRight"),
             Texture.from("moveRight"),
         );
-        this.moveRight.on("movingClick", this.onRightClick, this);
+        this.moveRight.on("downClick", this.onRightClick, this);
 
         this.moveRight.position.set(1100, 640);
         this.moveRight.scale.set(1.5)
@@ -81,30 +83,29 @@ export class MainScene extends Container implements IUpdateable {
         this.ninja1.y = HEIGHT - 100;
 
 
-        this.physNinja = new PhysicsContainer;
+        this.boss = new Boss;
+        this.boss.x = WIDTH - 200;
+        this.boss.y = HEIGHT - 200;
+        this.boss.speed.x -= 1;
+        this.background.addChild(this.boss)
 
-        this.addChild(this.physNinja);
-        this.ninja1.addChild(this.physNinja);
         this.ninja1.onIdle();
-
 
 
 
 
         this.addChild(this.ninja1, this.moveLeft, this.moveRight, this.attack);
 
-        this.sky.filters = [this.rainFilter];
 
+        this.sky.filters = [this.rainFilter];
 
 
     }
 
-    update(_Frame: number, deltaMS: number): void {
-        this.ninja1.update(deltaMS / (1000 / 60));
+    update(_frame: number, deltaMS: number): void {
+        this.ninja1.update(deltaMS);
+        this.boss.update(deltaMS);
 
-        if (!this.onLeftClick && !this.onRightClick && !this.onAClick) {
-            this.ninja1.onIdle();
-        }
 
         this.clouds1.tilePosition.x += this.ground1.x * this.worldTransform.a + deltaMS * 0.5;
         this.clouds2.tilePosition.x += this.ground2.x * this.worldTransform.a + deltaMS * 0.9;
@@ -135,6 +136,8 @@ export class MainScene extends Container implements IUpdateable {
     private onAClick(): void {
         console.log("attacking!")
         this.ninja1.onAttack();
+        this.boss.onAttackingBoss();
+        this.boss.speed.x = -0.5;
     }
 
 

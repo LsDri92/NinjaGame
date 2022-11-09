@@ -1,16 +1,15 @@
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
-import { Container } from "pixi.js";
 import { IUpdateable } from "../Utils/IUpdateable";
 import { StateAnimation } from "../Utils/StateAnimation";
 import { PhysicsContainer } from "./PhysicsContainer";
 
 
 
-export class NinjaAnim extends Container implements IUpdateable {
+export class NinjaAnim extends PhysicsContainer implements IUpdateable {
 
     private ninja: StateAnimation = new StateAnimation;
     private shadow: DropShadowFilter;
-    physPlayer: PhysicsContainer;
+   
 
 
     constructor() {
@@ -32,7 +31,7 @@ export class NinjaAnim extends Container implements IUpdateable {
             "similsekiro/run/3.png",
             "similsekiro/run/4.png",
             "similsekiro/run/5.png"
-        ]);
+        ], 0.10, false);
 
 
         this.ninja.addState("attack", [
@@ -63,15 +62,16 @@ export class NinjaAnim extends Container implements IUpdateable {
         
         
 
-        this.physPlayer = new PhysicsContainer();
-        this.addChild(this.physPlayer);
+      
+        
 
-        this.physPlayer.addChild(this.ninja);
+        this.addChild(this.ninja);
 
     };
 
-    public update(deltaMS: number) {
-        this.physPlayer.update(deltaMS / 1000);
+    public override update(deltaMS: number) {
+        super.update(deltaMS / 1000)
+        this.ninja.update(deltaMS / (1000/60));
 
     }
 

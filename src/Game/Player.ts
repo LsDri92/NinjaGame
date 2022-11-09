@@ -1,8 +1,8 @@
-import { Container } from "pixi.js";
 import { NinjaAnim } from "./NinjaAnim";
+import { PhysicsContainer } from "./PhysicsContainer";
 
 
-export class Player extends Container {
+export class Player extends PhysicsContainer {
     private player1: NinjaAnim;
 
     constructor() {
@@ -10,13 +10,10 @@ export class Player extends Container {
 
 
         this.player1 = new NinjaAnim;
+
         this.addChild(this.player1);
 
 
     }
 
-    update(deltaMS: number): void {
-        this.player1.update(deltaMS / 1000);
-
-    }
 }

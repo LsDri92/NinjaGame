@@ -30,7 +30,7 @@ export class Button extends Container {
 
 
     private onPointerDown(): void {
-        this.emit("movingClick")
+        this.emit("downClick")
         this.spr.texture = this.down;
     }
 
