@@ -30,19 +30,22 @@ export class Button extends Container {
 
 
     private onPointerDown(): void {
+        this.emit("movingClick")
         this.spr.texture = this.down;
     }
 
     private onPointerUp(): void {
-        this.emit("buttonClicked")
+        this.emit("upClicked");
         this.spr.texture = this.over;
     }
 
     private onPointerOver() {
+        this.emit("overClick");
         this.spr.texture = this.over;
     }
 
     private onPointerOut() {
+        this.emit("outClick");
         this.spr.texture = this.def;
     }
 }
