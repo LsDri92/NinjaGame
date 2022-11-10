@@ -1,13 +1,16 @@
 import { OldFilmFilter } from "@pixi/filter-old-film";
 import { Container, Texture, TilingSprite } from "pixi.js";
-import { HEIGHT, WIDTH } from "..";
 import { Boss } from "../Game/Boss";
 import { NinjaAnim as Player } from "../Game/NinjaAnim";
 import { Button } from "../Utils/Button";
 import { IUpdateable } from "../Utils/IUpdateable";
+import { Keyboard } from "../Utils/Keyboard";
+import { SceneBase } from "../Utils/SceneBase";
+import { SceneManager } from "../Utils/SceneManager";
 
 
-export class MainScene extends Container implements IUpdateable {
+
+export class MainScene extends SceneBase implements IUpdateable {
     private background: Container;
     private ninja1: Player;
     private rainFilter: OldFilmFilter;
@@ -21,7 +24,8 @@ export class MainScene extends Container implements IUpdateable {
     private ground2: TilingSprite;
     private ground3: TilingSprite;
     private boss: Boss;
-    
+    private time: number = 1;
+
 
 
     constructor() {
@@ -30,12 +34,12 @@ export class MainScene extends Container implements IUpdateable {
 
 
         this.background = new Container
-        this.sky = new TilingSprite(Texture.from("sky"), WIDTH, HEIGHT)
-        this.clouds1 = new TilingSprite(Texture.from("clouds1"), WIDTH * 6, HEIGHT);
-        this.clouds2 = new TilingSprite(Texture.from("clouds2"), WIDTH * 6, HEIGHT);
-        this.ground1 = new TilingSprite(Texture.from("ground1"), WIDTH * 6, HEIGHT);
-        this.ground2 = new TilingSprite(Texture.from("ground2"), WIDTH * 6, HEIGHT);
-        this.ground3 = new TilingSprite(Texture.from("ground3"), WIDTH * 6, HEIGHT);
+        this.sky = new TilingSprite(Texture.from("sky"), SceneManager.WIDTH, SceneManager.HEIGHT)
+        this.clouds1 = new TilingSprite(Texture.from("clouds1"), SceneManager.WIDTH * 6, SceneManager.HEIGHT);
+        this.clouds2 = new TilingSprite(Texture.from("clouds2"), SceneManager.WIDTH * 6, SceneManager.HEIGHT);
+        this.ground1 = new TilingSprite(Texture.from("ground1"), SceneManager.WIDTH * 6, SceneManager.HEIGHT);
+        this.ground2 = new TilingSprite(Texture.from("ground2"), SceneManager.WIDTH * 6, SceneManager.HEIGHT);
+        this.ground3 = new TilingSprite(Texture.from("ground3"), SceneManager.WIDTH * 6, SceneManager.HEIGHT);
 
         this.rainFilter = new OldFilmFilter({
             sepia: 1,
@@ -79,22 +83,23 @@ export class MainScene extends Container implements IUpdateable {
 
 
         this.ninja1 = new Player;
-        this.ninja1.x = WIDTH / 2;
-        this.ninja1.y = HEIGHT - 100;
+        this.ninja1.x = SceneManager.WIDTH / 2;
+        this.ninja1.y = SceneManager.HEIGHT - 100;
 
 
         this.boss = new Boss;
-        this.boss.x = WIDTH - 200;
-        this.boss.y = HEIGHT - 200;
-        this.boss.speed.x -= 1;
-        this.background.addChild(this.boss)
+        this.boss.x = SceneManager.WIDTH - 200;
+        this.boss.y = SceneManager.HEIGHT - 200;
+        //this.boss.speed.x -= 1;
+        this.boss.visible = true;
+
 
         this.ninja1.onIdle();
 
 
 
 
-        this.addChild(this.ninja1, this.moveLeft, this.moveRight, this.attack);
+        this.addChild(this.ninja1, this.moveLeft, this.moveRight, this.attack, this.boss);
 
 
         this.sky.filters = [this.rainFilter];
@@ -102,42 +107,63 @@ export class MainScene extends Container implements IUpdateable {
 
     }
 
-    update(_frame: number, deltaMS: number): void {
-        this.ninja1.update(deltaMS);
-        this.boss.update(deltaMS);
+    public update(deltaTime: number, _deltaFrame: number): void {
+        this.ninja1.update(deltaTime);
+        this.boss.update(deltaTime);
+        this.time += deltaTime / 1000;
+        console.log(this.time)
 
 
-        this.clouds1.tilePosition.x += this.ground1.x * this.worldTransform.a + deltaMS * 0.5;
-        this.clouds2.tilePosition.x += this.ground2.x * this.worldTransform.a + deltaMS * 0.9;
+        this.clouds1.tilePosition.x = this.ground1.x * this.worldTransform.a + this.time * 12;
+        this.clouds2.tilePosition.x = this.ground2.x * this.worldTransform.a + this.time * 18;
 
+        if (Keyboard.state.get("KeyA")) {
+            this.ninja1.onRun;
+            this.ninja1.scale.x = -1;
+            
+        } else if (Keyboard.state.get("KeyD")){
+            this.ninja1.onRun;
+            this.ninja1.scale.x = 1;
+            
+        } else if (Keyboard.state.get("KeyS")){
+            this.ninja1.onAttack();
+        } else {
+            this.ninja1.onIdle
+        };
 
+        
     }
 
-    private onLeftClick(): void {
+
+
+    private onLeftClick() {
         console.log("moving left");
         this.ninja1.onRun();
         this.ninja1.scale.x = -1;
 
-        this.ground1.tilePosition.x += this.ground2.x * this.worldTransform.a + WIDTH / 12;
-        this.ground2.tilePosition.x += this.ground3.x * this.worldTransform.a + WIDTH / 6;
-        this.ground3.tilePosition.x += this.background.x * this.worldTransform.a + WIDTH / 25;
+
+
+
+        this.ground1.tilePosition.x += this.ground2.x * this.worldTransform.a + SceneManager.WIDTH / 12;
+        this.ground2.tilePosition.x += this.ground3.x * this.worldTransform.a + SceneManager.WIDTH / 6;
+        this.ground3.tilePosition.x += this.background.x * this.worldTransform.a + SceneManager.WIDTH / 25;
     }
 
     private onRightClick(): void {
         console.log("moving Right");
         this.ninja1.onRun();
         this.ninja1.scale.x = 1;
+        
 
-        this.ground1.tilePosition.x -= this.ground2.x * this.worldTransform.a + WIDTH / 12;
-        this.ground2.tilePosition.x -= this.ground3.x * this.worldTransform.a + WIDTH / 6;
-        this.ground3.tilePosition.x -= this.background.x * this.worldTransform.a + WIDTH / 25;
+        this.ground1.tilePosition.x -= this.ground2.x * this.worldTransform.a + SceneManager.WIDTH / 12;
+        this.ground2.tilePosition.x -= this.ground3.x * this.worldTransform.a + SceneManager.WIDTH / 6;
+        this.ground3.tilePosition.x -= this.background.x * this.worldTransform.a + SceneManager.WIDTH / 25;
     }
 
     private onAClick(): void {
         console.log("attacking!")
         this.ninja1.onAttack();
-        this.boss.onAttackingBoss();
-        this.boss.speed.x = -0.5;
+        this.ninja1.speed.x = 0;
     }
 
 

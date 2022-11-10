@@ -9,6 +9,7 @@ export class NinjaAnim extends PhysicsContainer implements IUpdateable {
 
     private ninja: StateAnimation = new StateAnimation;
     private shadow: DropShadowFilter;
+
    
 
 
@@ -61,10 +62,6 @@ export class NinjaAnim extends PhysicsContainer implements IUpdateable {
         
         
         
-
-      
-        
-
         this.addChild(this.ninja);
 
     };
@@ -72,6 +69,7 @@ export class NinjaAnim extends PhysicsContainer implements IUpdateable {
     public override update(deltaMS: number) {
         super.update(deltaMS / 1000)
         this.ninja.update(deltaMS / (1000/60));
+
 
     }
 
@@ -81,6 +79,7 @@ export class NinjaAnim extends PhysicsContainer implements IUpdateable {
 
     public onIdle(){
         this.ninja.playState("idle", true);
+        
     }
 
     public onRun(){
